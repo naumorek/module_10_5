@@ -43,38 +43,41 @@ from multiprocessing import Lock,Queue
 
 lock = multiprocessing.Lock()
 
-count=0
+
 def read_info_q(name,q):
-    global count
+
     with open(f'{name}','r',encoding='utf-8') as file:
-        start_time1=time.time()
         while True:
             content = file.readline()
             if not content:
                 break
-        end_time1 = time.time()
-        count += 1
-        print(f'read_info_q запущен {count} раз')
-        q.put(end_time1-start_time1)
-        
+
+
+
+
+
 lock.acquire()
 def read_info(name):
-    global count
     with open(f'{name}','r',encoding='utf-8') as file:
-        start_time1=time.time()
         while True:
             content = file.readline()
             if not content:
                 break
-        end_time1 = time.time()
-        count += 1
-        print(f'read_info запущен {count} раз')
-        return (end_time1-start_time1)
 
-print(read_info('file 1.txt')+read_info('file 2.txt')+read_info('file 3.txt')+read_info('file 4.txt'), "секунд в линейном режиме")
+
+#start_time1=time.time()
+#read_info('file 1.txt')
+#read_info('file 2.txt')
+#read_info('file 3.txt')
+#read_info('file 4.txt')
+#end_time1=time.time()
+#print(f'{end_time1-start_time1} секунд в линейном режиме')
+
+# почему то запускается в каждом процессе линейный вызов функций
 lock.release()
 if __name__ == '__main__':
     q = Queue()
+    start_time1 = time.time()
     process1=multiprocessing.Process(target=read_info_q,args=('file 1.txt',q))
     process2=multiprocessing.Process(target=read_info_q,args=('file 2.txt',q))
     process3=multiprocessing.Process(target=read_info_q,args=('file 3.txt',q))
@@ -84,10 +87,15 @@ if __name__ == '__main__':
     process2.start()
     process3.start()
     process4.start()
+    process1.join()
+    process2.join()
+    process3.join()
+    process4.join()
 
+    end_time1 = time.time()
 
-    print(f"{q.get()+q.get()+q.get()+q.get()}, Секунд в многопроцессерном режиме")
-    print(count)
+    print(f'{end_time1-start_time1} секунд в мультипроцесорном режиме')
+
 
 
 
