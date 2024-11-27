@@ -36,12 +36,12 @@ filenames = [f'./file {number}.txt' for number in range(1, 5)]
 Файл module_10_5.py загрузите на ваш GitHub репозиторий. В решении пришлите ссылку на него.
 Успехов!
 '''
-import time
+import datetime
 import multiprocessing
-from multiprocessing import Lock,Queue
+from multiprocessing import Queue
 
 
-lock = multiprocessing.Lock()
+
 
 
 def read_info_q(name,q):
@@ -56,7 +56,7 @@ def read_info_q(name,q):
 
 
 
-lock.acquire()
+
 def read_info(name):
     with open(f'{name}','r',encoding='utf-8') as file:
         while True:
@@ -65,37 +65,36 @@ def read_info(name):
                 break
 
 
-#start_time1=time.time()
+#start = datetime.datetime.now()
 #read_info('file 1.txt')
 #read_info('file 2.txt')
 #read_info('file 3.txt')
 #read_info('file 4.txt')
-#end_time1=time.time()
-#print(f'{end_time1-start_time1} секунд в линейном режиме')
+#finish = datetime.datetime.now()
+#print(f'{finish - start} секунд в линейном режиме')
 
-# почему то запускается в каждом процессе линейный вызов функций
-lock.release()
+
+
 if __name__ == '__main__':
     q = Queue()
-    start_time1 = time.time()
-    process1=multiprocessing.Process(target=read_info_q,args=('file 1.txt',q))
-    process2=multiprocessing.Process(target=read_info_q,args=('file 2.txt',q))
-    process3=multiprocessing.Process(target=read_info_q,args=('file 3.txt',q))
-    process4=multiprocessing.Process(target=read_info_q,args=('file 4.txt',q))
+    filenames=['file 1.txt', 'file 2.txt', 'file 3.txt', 'file 4.txt']
 
-    process1.start()
-    process2.start()
-    process3.start()
-    process4.start()
-    process1.join()
-    process2.join()
-    process3.join()
-    process4.join()
+    with multiprocessing.Pool(processes=4) as pool:
+        start = datetime.datetime.now()
+        pool.map(read_info, filenames)
+        finish = datetime.datetime.now()
 
-    end_time1 = time.time()
 
-    print(f'{end_time1-start_time1} секунд в мультипроцесорном режиме')
+    print(f'{finish - start} секунд в мультипроцесорном режиме')
 
 
 
 
+#2. Запуск линейного и многопроцессного тут лучше производить отдельно.
+#3. Многопроцессный осуществляется с помощью Pool
+#if __name__ == '__main__':
+# start = datetime.datetime.now()
+# with multiprocessing.Pool(processes=4) as pool:
+# pool.map(read_info, filenames)
+# finish = datetime.datetime.now()
+# print(finish - start)
